@@ -1,0 +1,63 @@
+openapi: 3.0.3
+info:
+  title: Async Notification Service API
+  description: |
+    API for a reliable, async notification delivery platform.
+  version: 1.0.0
+
+servers:
+  - url: /api/v1
+    description: API v1
+
+paths:
+  /health/live:
+    get:
+      summary: Liveness check
+      tags:
+        - Health
+      responses:
+        '200':
+          description: Service is alive
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    type: object
+                    properties:
+                      status:
+                        type: string
+                        example: alive
+                  meta:
+                    type: object
+
+  /health/ready:
+    get:
+      summary: Readiness check
+      tags:
+        - Health
+      responses:
+        '200':
+          description: Service is ready
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    type: object
+                    properties:
+                      status:
+                        type: string
+                        example: ready
+                  meta:
+                    type: object
+
+tags:
+  - name: Health
+    description: Service health endpoints

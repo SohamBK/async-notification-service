@@ -1,8 +1,9 @@
 import express, { Application } from 'express';
+import v1Routes from './api/v1';
 import { errorHandler } from './middleware/error-handler';
 import { requestIdMiddleware } from './middleware/request-id';
 import { httpLogger } from './middleware/http-logger';
-import { prisma } from './db/prisma';
+import { setupSwagger } from './swagger';
 
 export function createApp(): Application {
   const app = express();
@@ -13,31 +14,18 @@ export function createApp(): Application {
 
   app.use(express.json());
 
-  app.get('/health', (_req, res) => {
-    res.status(200).json({
-      success: true,
-      data: { status: 'ok' },
-      meta: {},
-    });
-  });
+  // API routes
+  app.use('/api/v1', v1Routes);
 
-  app.get('/health/db', async (_req, res, next) => {
-    try {
-      await prisma.$queryRaw`SELECT 1`;
-      res.json({
-        success: true,
-        data: { db: 'connected' },
-        meta: {},
-      });
-    } catch (err) {
-      next(err);
-    }
-  });
+  // Swagger docs (must be BEFORE 404)
+  app.use('/docs', setupSwagger());
 
+  // 404 handler (LAST non-error middleware)
   app.use((_req, _res, next) => {
     next(new Error('Route not found'));
   });
 
+  // Error handler (ABSOLUTELY LAST)
   app.use(errorHandler);
 
   return app;
