@@ -2,6 +2,7 @@ import express, { Application } from 'express';
 import { errorHandler } from './middleware/error-handler';
 import { requestIdMiddleware } from './middleware/request-id';
 import { httpLogger } from './middleware/http-logger';
+import { prisma } from './db/prisma';
 
 export function createApp(): Application {
   const app = express();
@@ -18,6 +19,19 @@ export function createApp(): Application {
       data: { status: 'ok' },
       meta: {},
     });
+  });
+
+  app.get('/health/db', async (_req, res, next) => {
+    try {
+      await prisma.$queryRaw`SELECT 1`;
+      res.json({
+        success: true,
+        data: { db: 'connected' },
+        meta: {},
+      });
+    } catch (err) {
+      next(err);
+    }
   });
 
   app.use((_req, _res, next) => {
