@@ -1,15 +1,26 @@
 import express, { Application } from 'express';
+import { errorHandler } from './middleware/error-handler';
 
 export function createApp(): Application {
   const app = express();
 
-  // Core middleware
   app.use(express.json());
 
-  // Health check (used by Docker / k8s / monitoring)
   app.get('/health', (_req, res) => {
-    res.status(200).json({ status: 'ok' });
+    res.status(200).json({
+      success: true,
+      data: { status: 'ok' },
+      meta: {},
+    });
   });
+
+  // 404 handler (must be AFTER routes)
+  app.use((_req, _res, next) => {
+    next(new Error('Route not found'));
+  });
+
+  // Centralized error handler (last middleware)
+  app.use(errorHandler);
 
   return app;
 }

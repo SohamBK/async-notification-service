@@ -1,5 +1,5 @@
+import 'dotenv/config';
 import { startServer } from './server';
+import { env } from './config/env';
 
-const PORT = Number(process.env.PORT) || 3000;
-
-startServer(PORT);
+startServer(env.PORT);
