@@ -1,8 +1,14 @@
 import express, { Application } from 'express';
 import { errorHandler } from './middleware/error-handler';
+import { requestIdMiddleware } from './middleware/request-id';
+import { httpLogger } from './middleware/http-logger';
 
 export function createApp(): Application {
   const app = express();
+
+  // Request-scoped context
+  app.use(requestIdMiddleware);
+  app.use(httpLogger);
 
   app.use(express.json());
 
@@ -14,12 +20,10 @@ export function createApp(): Application {
     });
   });
 
-  // 404 handler (must be AFTER routes)
   app.use((_req, _res, next) => {
     next(new Error('Route not found'));
   });
 
-  // Centralized error handler (last middleware)
   app.use(errorHandler);
 
   return app;
